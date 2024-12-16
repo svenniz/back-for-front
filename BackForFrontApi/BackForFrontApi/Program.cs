@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// appsettings.json variable for whether or not using inmemory
+var isInMemoryDatabase = builder.Configuration.GetValue<bool>("UseInMemoryDatabase");
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -22,6 +25,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericEfCoreRepository
 builder.Services.AddScoped<IHouseRepository, HouseRepository>();
 
 // Configure CORS to allow any origin
+builder.Services.AddCors();
 //builder.Services.AddCors(options =>
 //{
 //    options.AddPolicy("AllowAll", builder =>
@@ -32,19 +36,25 @@ builder.Services.AddScoped<IHouseRepository, HouseRepository>();
 //    });
 //});
 
-// IN MEMORY DATABASE FOR TESTING
-//builder.Services.AddDbContext<HouseDbContext>
-//    (options => options.UseInMemoryDatabase("HouseDatabase"));
 
-// Folders for Sqlite Db
-var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SqliteDbs");
-Directory.CreateDirectory(folder);
-var path = Path.Combine(folder, "houses.db");
-
-// Configure DbContext with SQLite
+// Add DbContext:
 builder.Services.AddDbContext<HouseDbContext>(options =>
-    options.UseSqlite($"Data Source={path}")
-);
+{
+    if (isInMemoryDatabase)
+    {
+        options.UseInMemoryDatabase("HouseDatabase");
+        Console.WriteLine("Database is InMemory");
+    }
+    else
+    {
+        // Configure DbContext with SQLite
+        // Folders for Sqlite Db
+        var folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SqliteDbs");
+        Directory.CreateDirectory(folder);
+        var path = Path.Combine(folder, "houses.db");
+        options.UseSqlite($"Data Source={path}");
+    }
+});
 
 var app = builder.Build();
 
@@ -55,12 +65,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(p => p.WithOrigins("http://localhost:3000")
+    .AllowAnyHeader().AllowAnyMethod());
+
 app.UseHttpsRedirection();
 
-//app.MapGet("/houses", (IHouseRepository houseRepository, IMapper mapper) =>
-//    houseRepository.GetAllHouses());
-//app.MapGet("/houses1", (IHouseRepository houseRepository, IMapper mapper) =>
-//    houseRepository.GetAllHousesWithMap());
+app.MapGet("/houses", (IHouseRepository houseRepository, IMapper mapper) =>
+    houseRepository.GetAllHousesWithMap());
 
 app.UseAuthorization();
 

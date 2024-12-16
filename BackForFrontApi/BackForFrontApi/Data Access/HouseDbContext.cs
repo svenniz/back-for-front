@@ -14,10 +14,6 @@ namespace BackForFrontApi.Data_Access
             SeedData.Seed(modelBuilder);
             //base.OnModelCreating(modelBuilder);
 
-            //if (Database.IsInMemory()) // Or use an environment flag
-            //{
-            //    SeedData.Seed(modelBuilder);
-            //}
         }
     }
 }

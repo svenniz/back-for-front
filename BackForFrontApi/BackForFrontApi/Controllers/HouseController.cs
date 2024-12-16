@@ -10,7 +10,7 @@ using BackForFrontApi.Dtos;
 
 namespace BackForFrontApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class HouseController : ControllerBase
     {
@@ -24,7 +24,7 @@ namespace BackForFrontApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<HouseDto>>> GetAll()
         {
-            var houses = await _houseRepository.GetAllHouses();
+            var houses = await _houseRepository.GetAllHousesWithMap();
             return Ok(houses);
         }
 
