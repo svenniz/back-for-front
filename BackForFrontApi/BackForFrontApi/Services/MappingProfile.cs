@@ -8,7 +8,9 @@ namespace BackForFrontApi.Services
     {
         public MappingProfile() 
         {
-            CreateMap<HouseEntity, HouseDto>();
+            CreateMap<HouseEntity, HouseDto>().ReverseMap();
+            CreateMap<HouseEntity, HouseDetailsDto>().ReverseMap();
+            CreateMap<HouseDetailsDto, HouseEntity>();
         }
     }
 }

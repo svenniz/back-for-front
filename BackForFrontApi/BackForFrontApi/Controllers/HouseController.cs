@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using BackForFrontApi.Repositories;
 using BackForFrontApi.Dtos;
+using AutoMapper;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,9 +16,11 @@ namespace BackForFrontApi.Controllers
     public class HouseController : ControllerBase
     {
         private readonly IHouseRepository _houseRepository;
-        public HouseController(IHouseRepository houseRepository) 
+        private readonly IMapper _mapper;
+        public HouseController(IHouseRepository houseRepository, IMapper mapper)
         {
             _houseRepository = houseRepository;
+            _mapper = mapper;
         }
 
         // GET: api/<HouseController>
@@ -42,14 +45,29 @@ namespace BackForFrontApi.Controllers
 
         // POST api/<HouseController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<HouseDetailsDto>> Post([FromBody] HouseDetailsDto dto)
         {
+            if(dto == null)
+            {
+                return NotFound();
+            }
+            var newHouse = _houseRepository.AddHouse(dto);
+            await _houseRepository.SaveChanges();
+
+            return CreatedAtAction(nameof(Get),new {id = newHouse.Id }, newHouse);
         }
 
         // PUT api/<HouseController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult<HouseDetailsDto>> Put(int id, [FromBody] HouseDetailsDto dto)
         {
+            var entity = await _houseRepository.Get(dto.Id);
+            if(entity == null)
+            {
+                return BadRequest();
+            }
+            _houseRepository.DtoToEntity(dto,entity);
+            
         }
 
         // DELETE api/<HouseController>/5

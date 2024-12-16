@@ -43,13 +43,33 @@ namespace BackForFrontApi.Repositories
         public async Task<HouseDetailsDto?> GetDetails(int id)
         {
             var house = await _context.Houses
-                .FirstOrDefaultAsync(h=>h.Id == id);
+                .SingleOrDefaultAsync(h=>h.Id == id);
             if(house == null)
             {
                 return null;
             }
             return new HouseDetailsDto(house.Id, house.Address, house.Country, 
                 house.Price, house.Description, house.Photo);
+        }
+        public async Task<HouseDetailsDto?> AddHouse(HouseDetailsDto house)
+        {
+            if(house == null)
+            {
+                return null;
+            }
+            var newHouse = _mapper.Map<HouseEntity>(house);
+            Add(newHouse);
+            return _mapper.Map<HouseDetailsDto>(newHouse);
+        }
+
+        public void DtoToEntity(HouseDetailsDto dto, HouseEntity entity)
+        {
+
+            entity.Address = dto.Address;
+            entity.Country = dto.Country;
+            entity.Price = dto.Price;
+            entity.Description = dto.description;
+            entity.Photo = dto.photo;
         }
     }
 }
