@@ -30,9 +30,9 @@ namespace BackForFrontApi.Controllers
 
         // GET api/<HouseController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<HouseEntity>> Get(int id)
+        public async Task<ActionResult<HouseDetailsDto>> Get(int id)
         {
-            var house = await _houseRepository.Get(id);
+            var house = await _houseRepository.GetDetails(id);
             if (house == null)
             {
                 return NotFound(new {Message = $"House with ID {id} was not found!"});

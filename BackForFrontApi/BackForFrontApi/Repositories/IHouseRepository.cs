@@ -7,5 +7,6 @@ namespace BackForFrontApi.Repositories
     {
         Task<List<HouseDto>> GetAllHouses();
         Task<List<HouseDto>> GetAllHousesWithMap();
+        Task<HouseDetailsDto?> GetDetails(int id);
     }
 }
