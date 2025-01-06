@@ -64,7 +64,6 @@ namespace BackForFrontApi.Repositories
 
         public void DtoToEntity(HouseDetailsDto dto, HouseEntity entity)
         {
-
             entity.Address = dto.Address;
             entity.Country = dto.Country;
             entity.Price = dto.Price;
