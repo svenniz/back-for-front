@@ -61,13 +61,21 @@ namespace BackForFrontApi.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<HouseDetailsDto>> Put(int id, [FromBody] HouseDetailsDto dto)
         {
-            var entity = await _houseRepository.Get(dto.Id);
-            if(entity == null)
+            if (dto == null || id != dto.Id)
             {
                 return BadRequest();
             }
-            _houseRepository.DtoToEntity(dto,entity);
-            
+
+            var houseToUpdate = await _houseRepository.GetDetails(id);
+            if (houseToUpdate == null)
+            {
+                return NotFound(new { Message = $"House with ID {id} was not found!" });
+            }
+
+            var updatedHouse = await _houseRepository.UpdateHouse(id, dto);
+            await _houseRepository.SaveChanges();
+
+            return Ok(updatedHouse);
         }
 
         // DELETE api/<HouseController>/5

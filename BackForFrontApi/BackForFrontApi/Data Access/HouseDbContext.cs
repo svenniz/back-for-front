@@ -13,7 +13,6 @@ namespace BackForFrontApi.Data_Access
         {
             SeedData.Seed(modelBuilder);
             //base.OnModelCreating(modelBuilder);
-
         }
     }
 }
