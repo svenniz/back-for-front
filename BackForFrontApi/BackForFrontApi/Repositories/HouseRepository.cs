@@ -30,6 +30,7 @@ namespace BackForFrontApi.Repositories
             var houseEntities = await _context.Houses.ToListAsync();
             return _mapper.Map<List<HouseDto>>(houseEntities);
         }
+
         public async Task<HouseDto?> GetHouseDto(int id) 
         {
             var houseEntity = await _context.Houses.FirstOrDefaultAsync(h => h.Id == id);
@@ -48,21 +49,75 @@ namespace BackForFrontApi.Repositories
             {
                 return null;
             }
-            return new HouseDetailsDto(house.Id, house.Address, house.Country, 
-                house.Price, house.Description, house.Photo);
+            return EntityToDetailsDto(house);
         }
+        
         public async Task<HouseDetailsDto?> AddHouse(HouseDetailsDto house)
         {
-            if(house == null)
+            if (house == null)
+            {
+                return null;
+            }
+            var newHouse = new HouseEntity();
+            DtoToEntity(house, newHouse);
+            Add(newHouse);
+            await SaveChanges();
+            return EntityToDetailsDto(newHouse);
+        }
+
+        public async Task<HouseDetailsDto?> UpdateHouse(int id, HouseDetailsDto house)
+        {
+            var houseEntity = await _context.Houses.FirstOrDefaultAsync(h => h.Id == id);
+            if (houseEntity == null)
+            {
+                return null;
+            }
+            DtoToEntity(house, houseEntity);
+            _context.Entry(houseEntity).State = EntityState.Modified;
+            await SaveChanges();
+            return EntityToDetailsDto(houseEntity);
+        }
+
+        public async Task DeleteHouse(int id)
+        {
+            var houseEntity = await _context.Houses.FirstOrDefaultAsync(h => h.Id == id);
+            if (houseEntity != null)
+            {
+                Delete(houseEntity);
+                await SaveChanges();
+            }
+        }
+
+        public async Task<HouseDetailsDto?> AddHouseWithMap(HouseDetailsDto house)
+        {
+            if (house == null)
             {
                 return null;
             }
             var newHouse = _mapper.Map<HouseEntity>(house);
             Add(newHouse);
+            await SaveChanges();
             return _mapper.Map<HouseDetailsDto>(newHouse);
         }
 
-        public void DtoToEntity(HouseDetailsDto dto, HouseEntity entity)
+        public async Task<HouseDetailsDto?> UpdateHouseWithMap(int id, HouseDetailsDto house)
+        {
+            var houseEntity = await _context.Houses.FirstOrDefaultAsync(h => h.Id == id);
+            if (houseEntity == null)
+            {
+                return null;
+            }
+            _mapper.Map(house, houseEntity);
+            _context.Entry(houseEntity).State = EntityState.Modified;
+            await SaveChanges();
+            return _mapper.Map<HouseDetailsDto>(houseEntity);
+        }
+
+        private static HouseDetailsDto EntityToDetailsDto(HouseEntity entity)
+        {
+            return new HouseDetailsDto(entity.Id, entity.Address, entity.Country, entity.Price, entity.Description, entity.Photo);
+        }
+        private static void DtoToEntity(HouseDetailsDto dto, HouseEntity entity)
         {
             entity.Address = dto.Address;
             entity.Country = dto.Country;
